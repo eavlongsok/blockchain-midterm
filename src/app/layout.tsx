@@ -20,7 +20,7 @@ export default function RootLayout({
         <html lang='en'>
             <body className={inter.className}>
                 <div className='w-full h-16 bg-gray-400 text-3xl font-bold flex items-center pl-10'>
-                    Blockchain Demo
+                    <Link href='/'>Blockchain Demo</Link>
                     <Link
                         href='/pending-transactions'
                         className='ml-auto pr-10'
