@@ -20,3 +20,17 @@ model Blockchain {
     timestamp    DateTime @db.Timestamptz(3)
     nonce        Int
 }
+
+model PendingTransaction {
+    id          String   @id @default(uuid())
+    fromAddress String
+    toAddress   String
+    amount      Float
+    timeStamp   DateTime @db.Timestamptz(3)
+    signature   String
+}
+
+model Wallet {
+    address    String @id
+    privateKey String
+}
