@@ -1,3 +1,5 @@
+"use client";
+
 import {
     Table,
     TableBody,
@@ -8,18 +10,32 @@ import {
 } from "@/components/ui/table";
 import { Wallet } from "@prisma/client";
 import Link from "next/link";
-
-const wallet: Wallet = {
-    address: "0x1234567890abcdef",
-    privateKey: "0xabcdef1234567890",
-};
-
-const wallets: Wallet[] = [wallet, wallet, wallet, wallet, wallet];
+import { useEffect, useState } from "react";
+import CreateWallet from "./CreateWallet";
 
 export default function Page() {
+    const [wallets, setWallets] = useState<Wallet[]>([]);
+
+    useEffect(() => {
+        async function fetchWallets() {
+            const response = await fetch("/api/wallets");
+            const json = await response.json();
+            const wallets: Wallet[] = json.wallets;
+
+            setWallets(wallets);
+        }
+        fetchWallets();
+    }, []);
     return (
         <div className='mx-10 my-10'>
             <h1 className='text-3xl font-bold'>Wallets</h1>
+            <div className='mt-4'>
+                <CreateWallet
+                    onCreate={(newWallet) =>
+                        setWallets((prev) => [...prev, newWallet])
+                    }
+                />
+            </div>
             <div className='rounded-md border my-5'>
                 <Table className='mt-5'>
                     <TableHeader>

@@ -26,11 +26,11 @@ model PendingTransaction {
     fromAddress String
     toAddress   String
     amount      Float
-    timeStamp   DateTime @db.Timestamptz(3)
+    timestamp   DateTime @db.Timestamptz(3)
     signature   String
 }
 
 model Wallet {
-    address    String @id
-    privateKey String
+    address    String  @id
+    privateKey String?
 }

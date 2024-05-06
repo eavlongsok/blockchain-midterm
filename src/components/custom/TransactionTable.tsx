@@ -2,11 +2,13 @@ import { Transaction } from "@/app/type";
 import {
     Table,
     TableBody,
+    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
 
 export default function TransactionTable({
     transactions,
@@ -15,18 +17,21 @@ export default function TransactionTable({
 }) {
     return (
         <div className='rounded-md border my-5'>
-            <Table className='mt-5'>
+            <Table className='mt-5 caption-top'>
+                <TableCaption className='font-semibold text-black text-lg'>
+                    Transactions
+                </TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Timestamp</TableHead>
-                        <TableHead className='max-w-[300px] break-words'>
+                        <TableHead className='max-w-[200px] break-words'>
                             From
                         </TableHead>
-                        <TableHead className='max-w-[300px] break-words'>
+                        <TableHead className='max-w-[200px] break-words'>
                             To
                         </TableHead>
                         <TableHead>Amount</TableHead>
-                        <TableHead className='max-w-[300px] break-words'>
+                        <TableHead className='max-w-[200px] break-words'>
                             Signature
                         </TableHead>
                     </TableRow>
@@ -40,14 +45,26 @@ export default function TransactionTable({
                                     <TableCell>
                                         {transaction.timestamp}
                                     </TableCell>
-                                    <TableCell className='max-w-[450px] truncate'>
-                                        {transaction.fromAddress}
+                                    <TableCell className='max-w-[200px] truncate'>
+                                        {transaction.fromAddress.length > 0 ? (
+                                            <Link
+                                                href={`/wallets/${transaction.fromAddress}`}
+                                            >
+                                                {transaction.fromAddress}
+                                            </Link>
+                                        ) : (
+                                            <>{transaction.fromAddress}</>
+                                        )}
                                     </TableCell>
-                                    <TableCell className='max-w-[450px] truncate'>
-                                        {transaction.toAddress}
+                                    <TableCell className='max-w-[200px] truncate'>
+                                        <Link
+                                            href={`/wallets/${transaction.toAddress}`}
+                                        >
+                                            {transaction.toAddress}
+                                        </Link>
                                     </TableCell>
                                     <TableCell>{transaction.amount}</TableCell>
-                                    <TableCell className='max-w-[450px] truncate'>
+                                    <TableCell className='max-w-[200px] truncate'>
                                         {transaction.signature}
                                     </TableCell>
                                 </TableRow>

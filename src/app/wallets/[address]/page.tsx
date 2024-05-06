@@ -2,6 +2,7 @@ import { Transaction } from "@/app/type";
 import TransactionTable from "@/components/custom/TransactionTable";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import MinePendingTransactions from "./MinePendingTransactions";
 
 const transaction: Transaction = {
     timestamp: "2021-10-10 12:00:00",
@@ -21,12 +22,18 @@ const transactions: Transaction[] = [
 
 export default function Page({ params }: { params: { address: string } }) {
     return (
-        <div className='mx-10 my-10'>
-            <h1 className='text-3xl font-bold'>Wallet {params.address}</h1>
+        <div className='mx-10 my-10 '>
+            <h1 className='text-3xl font-bold max-w-[80vw] break-words'>
+                Wallet {params.address}
+            </h1>
             <h2 className='text-xl font-bold mt-4'>Balance: $132.43</h2>
-            <Link href={`/create-transaction/${params.address}`}>
-                <Button className='mt-5'>Send</Button>
-            </Link>
+            <div className='mt-4 flex space-x-4'>
+                <Link href={`/create-transaction/${params.address}`}>
+                    <Button>Send</Button>
+                </Link>
+                <MinePendingTransactions address={params.address} />
+            </div>
+
             <TransactionTable transactions={transactions} />
         </div>
     );

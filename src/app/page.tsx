@@ -1,30 +1,54 @@
+"use client";
+
 import {
     Table,
     TableBody,
+    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import CreateGenesisBlock from "./CreateGenesisBlock";
+import Verification from "./Verification";
 import { Block } from "./type";
 
-const block: Block = {
-    timestamp: "2021-10-10 12:00:00",
-    data: "Hello, world!",
-    hash: "0013901va89bnf91313",
-    previousHash: "0xfjdlskafioafjafv",
-    nonce: 20413,
-};
-
-const blocks: Block[] = [block, block, block, block, block];
+async function getBlocks(): Promise<Block[]> {
+    const response = await fetch("/api/blocks");
+    const data = await response.json();
+    return data.blocks;
+}
 
 export default function Page() {
+    const [blocks, setBlocks] = useState<Block[]>([]);
+    const [hasFetched, setHasFetched] = useState(false);
+
+    useEffect(() => {
+        async function fetchData() {
+            const fetchedBlocks = await getBlocks();
+            setBlocks(fetchedBlocks);
+            setHasFetched(true);
+        }
+        fetchData();
+    }, []);
+
     return (
         <div className='mx-10 my-10'>
             <h1 className='text-3xl font-bold'>Home Page</h1>
+            <div className='mt-4 flex space-x-4'>
+                <Verification />
+                <CreateGenesisBlock
+                    isVisible={hasFetched && blocks.length === 0}
+                    onCreate={(block) => setBlocks([{ ...block }])}
+                />
+            </div>
             <div className='rounded-md border my-5'>
-                <Table className='mt-5'>
+                <Table className='mt-5 caption-top'>
+                    <TableCaption className='font-semibold text-black text-lg'>
+                        Blocks
+                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Timestamp</TableHead>
