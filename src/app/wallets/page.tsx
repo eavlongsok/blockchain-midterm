@@ -88,7 +88,7 @@ export default function Page() {
                         ) : (
                             <TableRow>
                                 <TableCell
-                                    colSpan={2}
+                                    colSpan={3}
                                     className='h-24 text-center'
                                 >
                                     No results.
