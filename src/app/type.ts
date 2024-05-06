@@ -171,6 +171,22 @@ export class BlockchainClass {
     }
 
     minePendingTransactions(miningRewardAddress: string) {
+        if (this.pendingTransactions.length === 0) {
+            throw new Error("There are no pending transactions to mine");
+        }
+
+        if (this.chain.length === 0) {
+            throw new Error("Genesis block does not exist");
+        }
+
+        if (miningRewardAddress.length === 0) {
+            throw new Error("Invalid mining reward address");
+        }
+
+        if (miningRewardAddress === process.env.OFFICIAL_WALLET_ADDRESS) {
+            throw new Error("Cannot send mining reward to the official wallet");
+        }
+
         const rewardTx = new TransactionClass(
             new Date(Date.now()).toISOString(),
             process.env.OFFICIAL_WALLET_ADDRESS as string,

@@ -12,14 +12,16 @@ import Link from "next/link";
 
 export default function TransactionTable({
     transactions,
+    caption = "Transactions",
 }: {
     transactions: Transaction[];
+    caption?: string;
 }) {
     return (
         <div className='rounded-md border my-5'>
             <Table className='mt-5 caption-top'>
                 <TableCaption className='font-semibold text-black text-lg'>
-                    Transactions
+                    {caption}
                 </TableCaption>
                 <TableHeader>
                     <TableRow>
@@ -72,7 +74,7 @@ export default function TransactionTable({
                         })
                     ) : (
                         <TableRow>
-                            <TableCell colSpan={4} className='h-24 text-center'>
+                            <TableCell colSpan={5} className='h-24 text-center'>
                                 No results.
                             </TableCell>
                         </TableRow>

@@ -22,12 +22,11 @@ model Blockchain {
 }
 
 model PendingTransaction {
-    id          String   @id @default(uuid())
     fromAddress String
     toAddress   String
     amount      Float
     timestamp   DateTime @db.Timestamptz(3)
-    signature   String
+    signature   String   @id
 }
 
 model Wallet {

@@ -12,6 +12,7 @@ import { Wallet } from "@prisma/client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import CreateWallet from "./CreateWallet";
+import { Button } from "@/components/ui/button";
 
 export default function Page() {
     const [wallets, setWallets] = useState<Wallet[]>([]);
@@ -42,6 +43,9 @@ export default function Page() {
                         <TableRow>
                             <TableHead>No.</TableHead>
                             <TableHead>Address</TableHead>
+                            <TableHead className='text-center'>
+                                Action
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -64,13 +68,27 @@ export default function Page() {
                                                 {wallet.address}
                                             </Link>
                                         </TableCell>
+                                        <TableCell className='flex justify-center'>
+                                            <Button
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(
+                                                        wallet.address
+                                                    );
+                                                    alert(
+                                                        "Copied to clipboard!"
+                                                    );
+                                                }}
+                                            >
+                                                Copy Address
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 );
                             })
                         ) : (
                             <TableRow>
                                 <TableCell
-                                    colSpan={4}
+                                    colSpan={2}
                                     className='h-24 text-center'
                                 >
                                     No results.

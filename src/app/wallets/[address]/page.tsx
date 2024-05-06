@@ -4,29 +4,55 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import MinePendingTransactions from "./MinePendingTransactions";
 
-const transaction: Transaction = {
-    timestamp: "2021-10-10 12:00:00",
-    fromAddress: "0x1234567890abcdef",
-    toAddress: "0xabcdef1234567890",
-    amount: 100.25,
-    signature: "f13i1bnuihd134",
-};
+async function getWalletInformation(address: string): Promise<{
+    balance: number;
+    transactions: Transaction[];
+    pendingTransactions: Transaction[];
+} | null> {
+    try {
+        const response = await fetch(
+            `${process.env.NEXT_URL}/api/wallets/${address}`,
+            {
+                cache: "no-cache",
+            }
+        );
+        const json = await response.json();
 
-const transactions: Transaction[] = [
-    transaction,
-    transaction,
-    transaction,
-    transaction,
-    transaction,
-];
+        if (response.status !== 200) {
+            throw new Error(json.error);
+        }
 
-export default function Page({ params }: { params: { address: string } }) {
+        return json;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+}
+
+export default async function Page({
+    params,
+}: {
+    params: { address: string };
+}) {
+    const data = await getWalletInformation(params.address);
+
+    if (data === null) {
+        return (
+            <div className='font-bold text-2xl flex justify-center mt-4'>
+                Wallet not found
+            </div>
+        );
+    }
+
+    const { balance, transactions, pendingTransactions } = data;
     return (
         <div className='mx-10 my-10 '>
             <h1 className='text-3xl font-bold max-w-[80vw] break-words'>
                 Wallet {params.address}
             </h1>
-            <h2 className='text-xl font-bold mt-4'>Balance: $132.43</h2>
+            <h2 className='text-xl font-bold mt-4'>
+                Balance: ${balance.toLocaleString("en")}
+            </h2>
             <div className='mt-4 flex space-x-4'>
                 <Link href={`/create-transaction/${params.address}`}>
                     <Button>Send</Button>
@@ -35,6 +61,12 @@ export default function Page({ params }: { params: { address: string } }) {
             </div>
 
             <TransactionTable transactions={transactions} />
+            <br />
+            <br />
+            <TransactionTable
+                transactions={pendingTransactions}
+                caption='Pending Transactions'
+            />
         </div>
     );
 }
