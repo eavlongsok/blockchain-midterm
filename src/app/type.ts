@@ -298,9 +298,6 @@ export class BlockchainClass {
         tmpBlockchain.createGenesisBlock();
         const realGenesis = JSON.stringify(tmpBlockchain.chain[0]);
 
-        console.log({ realGenesis });
-        console.log({ chainGenesis: JSON.stringify(this.chain[0]) });
-
         if (realGenesis !== JSON.stringify(this.chain[0])) {
             return false;
         }

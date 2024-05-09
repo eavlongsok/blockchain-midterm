@@ -21,7 +21,10 @@ export default function Page() {
     return (
         <div className='mx-10 my-10'>
             <h1 className='text-3xl font-bold'>Pending Transactions</h1>
-            <TransactionTable transactions={transactions} />
+            <TransactionTable
+                transactions={transactions}
+                caption='Pending Transaction'
+            />
         </div>
     );
 }
