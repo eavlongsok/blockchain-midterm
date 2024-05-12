@@ -63,7 +63,7 @@ export class TransactionClass {
         this.signature = signature.toDER("hex");
     }
 
-    public isValid(): boolean {
+    isSignatureValid(): boolean {
         // the plan is to make an official wallet for the blockchain, which will supply the "coin"
         // so we will check if fromAddress is null, then we return false
 
@@ -123,7 +123,7 @@ export class BlockClass {
 
     hasValidTransactions(): boolean {
         for (const tx of this.transactions) {
-            if (!tx.isValid()) {
+            if (!tx.isSignatureValid()) {
                 return false;
             }
         }
@@ -137,10 +137,13 @@ export class BlockchainClass {
     pendingTransactions: TransactionClass[];
     miningReward: number;
 
-    constructor(blocks: BlockClass[]) {
+    constructor(
+        blocks: BlockClass[],
+        pendingTransactions: TransactionClass[] = []
+    ) {
         this.chain = blocks;
         this.difficulty = parseInt(process.env.DIFFICULTY || "4");
-        this.pendingTransactions = [];
+        this.pendingTransactions = pendingTransactions;
         this.miningReward = parseInt(process.env.MINING_REWARD || "100");
     }
 
@@ -151,7 +154,7 @@ export class BlockchainClass {
         const tx = new TransactionClass(
             new Date("2000-01-01").toISOString(),
             "",
-            process.env.OFFICIAL_WALLET_ADDRESS as string,
+            process.env.NEXT_PUBLIC_OFFICIAL_WALLET_ADDRESS as string,
             200_000_000_000,
             ""
         );
@@ -183,19 +186,23 @@ export class BlockchainClass {
             throw new Error("Invalid mining reward address");
         }
 
-        if (miningRewardAddress === process.env.OFFICIAL_WALLET_ADDRESS) {
-            throw new Error("Cannot send mining reward to the official wallet");
+        if (
+            miningRewardAddress ===
+            process.env.NEXT_PUBLIC_OFFICIAL_WALLET_ADDRESS
+        ) {
+            throw new Error("Official wallet cannot receive mining reward");
         }
 
         const rewardTx = new TransactionClass(
             new Date(Date.now()).toISOString(),
-            process.env.OFFICIAL_WALLET_ADDRESS as string,
+            process.env.NEXT_PUBLIC_OFFICIAL_WALLET_ADDRESS as string,
             miningRewardAddress,
             this.miningReward,
             ""
         );
+
         rewardTx.sign(
-            ec.keyFromPrivate(process.env.OFFCIAL_WALLET_PRIVATE_KEY as string)
+            ec.keyFromPrivate(process.env.OFFICIAL_WALLET_PRIVATE_KEY as string)
         );
 
         this.pendingTransactions.push(rewardTx);
@@ -207,6 +214,12 @@ export class BlockchainClass {
             this.getLatestBlock().hash
         );
 
+        const areTransactionsValid = block.hasValidTransactions();
+
+        if (!areTransactionsValid) {
+            throw new Error("Cannot mine block with invalid transactions");
+        }
+
         block.mineBlock(this.difficulty);
 
         this.chain.push(block);
@@ -214,50 +227,74 @@ export class BlockchainClass {
         this.pendingTransactions = [];
     }
 
-    addTransaction(transaction: TransactionClass) {
-        if (
-            transaction.fromAddress.length === 0 ||
-            transaction.toAddress.length === 0
-        ) {
-            throw new Error("Transaction must include from and to address");
-        }
+    validateTransactionDetail(
+        transaction: TransactionClass,
+        checkSignature: boolean = false
+    ): {
+        message: string;
+        isValid: boolean;
+    } {
+        try {
+            if (
+                transaction.fromAddress.length === 0 ||
+                transaction.toAddress.length === 0
+            ) {
+                throw new Error("Transaction must include from and to address");
+            }
 
-        if (!transaction.isValid()) {
-            throw new Error("Cannot add invalid transaction to chain");
-        }
-
-        if (transaction.fromAddress === transaction.toAddress) {
-            throw new Error("Cannot send coins to yourself");
-        }
-
-        if (transaction.amount <= 0) {
-            throw new Error("Transaction amount should be higher than 0");
-        }
-
-        const walletBalance = this.getBalanceOfAddress(transaction.fromAddress);
-
-        if (walletBalance < transaction.amount) {
-            throw new Error("Not enough balance");
-        }
-
-        const pendingTxForWallet = this.pendingTransactions.filter(
-            (tx) => tx.fromAddress === transaction.fromAddress
-        );
-
-        if (pendingTxForWallet.length > 0) {
-            const totalPendingAmount = pendingTxForWallet
-                .map((tx) => tx.amount)
-                .reduce((prev, curr) => prev + curr);
-
-            const totalAmount = totalPendingAmount + transaction.amount;
-            if (totalAmount > walletBalance) {
+            if (transaction.fromAddress === transaction.toAddress) {
                 throw new Error(
-                    "Pending transactions for this wallet is higher than its balance."
+                    "Sender and receiver addresses cannot be the same"
                 );
             }
-        }
 
-        this.pendingTransactions.push(transaction);
+            if (checkSignature && !transaction.isSignatureValid()) {
+                throw new Error("Cannot add invalid transaction to chain");
+            }
+
+            if (transaction.fromAddress === transaction.toAddress) {
+                throw new Error("Cannot send coins to yourself");
+            }
+
+            if (transaction.amount <= 0) {
+                throw new Error("Transaction amount should be higher than 0");
+            }
+
+            const walletBalance = this.getBalanceOfAddress(
+                transaction.fromAddress
+            );
+
+            if (walletBalance < transaction.amount) {
+                throw new Error("Not enough balance");
+            }
+
+            const pendingTxForWallet = this.pendingTransactions.filter(
+                (tx) => tx.fromAddress === transaction.fromAddress
+            );
+
+            if (pendingTxForWallet.length > 0) {
+                const totalPendingAmount = pendingTxForWallet
+                    .map((tx) => tx.amount)
+                    .reduce((prev, curr) => prev + curr);
+
+                const totalAmount = totalPendingAmount + transaction.amount;
+                if (totalAmount > walletBalance) {
+                    throw new Error(
+                        "Pending transactions for this wallet is higher than its balance."
+                    );
+                }
+            }
+
+            return {
+                message: "Valid transaction detail",
+                isValid: true,
+            };
+        } catch (e: any) {
+            return {
+                message: e.message,
+                isValid: false,
+            };
+        }
     }
 
     getBalanceOfAddress(address: string): number {

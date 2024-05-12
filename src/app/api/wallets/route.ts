@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import prismaClient from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
 export async function GET() {
     let wallets = await prismaClient.wallet.findMany();
@@ -12,3 +12,5 @@ export async function GET() {
 
     return NextResponse.json({ wallets });
 }
+
+export const dynamic = "force-dynamic";

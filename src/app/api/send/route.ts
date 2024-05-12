@@ -1,6 +1,7 @@
-import { TransactionClass } from "@/app/type";
+import { BlockchainClass, TransactionClass } from "@/app/type";
 import ec from "@/lib/ec";
 import prismaClient from "@/lib/prisma";
+import { getBlocksAsClass, getPendingTransactionsAsClass } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -9,13 +10,6 @@ export async function POST(request: Request) {
     // validate wallet addresses
     if (!fromAddress || !toAddress || !amount) {
         return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-    }
-
-    if (fromAddress === toAddress) {
-        return NextResponse.json(
-            { error: "Sender and receiver addresses are the same" },
-            { status: 400 }
-        );
     }
 
     const senderWallet = await prismaClient.wallet.findUnique({
@@ -48,8 +42,23 @@ export async function POST(request: Request) {
         "" // signature
     );
 
+    const blocks = await getBlocksAsClass();
+    const pendingTransactions = await getPendingTransactionsAsClass();
+    const blockchain = new BlockchainClass(blocks, pendingTransactions);
+
+    const returnedData = blockchain.validateTransactionDetail(transactionClass);
+
+    if (!returnedData.isValid) {
+        return NextResponse.json(
+            { error: returnedData.message },
+            { status: 400 }
+        );
+    }
+
     let senderPrivateKey = "";
-    if (senderWallet.address === process.env.OFFICIAL_WALLET_ADDRESS) {
+    if (
+        senderWallet.address === process.env.NEXT_PUBLIC_OFFICIAL_WALLET_ADDRESS
+    ) {
         senderPrivateKey = process.env.OFFICIAL_WALLET_PRIVATE_KEY as string;
     } else {
         senderPrivateKey = senderWallet.privateKey ?? "";

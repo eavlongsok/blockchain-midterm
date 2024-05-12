@@ -8,7 +8,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import Link from "next/link";
 
 export default function TransactionTable({
     transactions,
@@ -49,21 +48,21 @@ export default function TransactionTable({
                                     </TableCell>
                                     <TableCell className='max-w-[200px] truncate'>
                                         {transaction.fromAddress.length > 0 ? (
-                                            <Link
+                                            <a
                                                 href={`/wallets/${transaction.fromAddress}`}
                                             >
                                                 {transaction.fromAddress}
-                                            </Link>
+                                            </a>
                                         ) : (
                                             <>{transaction.fromAddress}</>
                                         )}
                                     </TableCell>
                                     <TableCell className='max-w-[200px] truncate'>
-                                        <Link
+                                        <a
                                             href={`/wallets/${transaction.toAddress}`}
                                         >
                                             {transaction.toAddress}
-                                        </Link>
+                                        </a>
                                     </TableCell>
                                     <TableCell>{transaction.amount}</TableCell>
                                     <TableCell className='max-w-[200px] truncate'>

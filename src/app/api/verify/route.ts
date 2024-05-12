@@ -8,3 +8,5 @@ export async function GET() {
     const isValid = blockchainClass.isChainValid();
     return NextResponse.json({ valid: isValid });
 }
+
+export const dynamic = "force-dynamic";

@@ -27,8 +27,6 @@ export async function GET(
             where: { fromAddress: address },
         });
 
-    console.log(pendingTransactionsClass);
-
     const blocksClass = await getBlocksAsClass();
 
     const blockchainClass = new BlockchainClass(blocksClass);

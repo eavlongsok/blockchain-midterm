@@ -11,7 +11,7 @@ export default function Verification() {
     async function handleClick() {
         setIsMessageVisible(false);
         const response = await fetch("/api/verify", {
-            cache: "no-cache",
+            cache: "no-store",
         });
         const data = await response.json();
         setValid(data.valid);

@@ -7,3 +7,5 @@ export async function GET() {
     });
     return NextResponse.json({ blocks });
 }
+
+export const dynamic = "force-dynamic";

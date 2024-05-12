@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import { BlockchainClass } from "@/app/type";
 import prismaClient from "@/lib/prisma";
-import { getPendingTransactionsAsClass, getBlocksAsClass } from "@/lib/utils";
+import { getBlocksAsClass, getPendingTransactionsAsClass } from "@/lib/utils";
+import { NextResponse } from "next/server";
 
 export async function POST(
     request: Request,
@@ -21,11 +21,23 @@ export async function POST(
             });
         }
 
+        const wallet = await prismaClient.wallet.findUnique({
+            where: { address },
+        });
+
+        // If wallet not found, return error
+        if (!wallet) {
+            return NextResponse.json(
+                { success: false, message: "Wallet not found" },
+                { status: 404 }
+            );
+        }
+
         // Get blocks
         const blocks = await getBlocksAsClass();
 
         // Create blockchain instance
-        const blockchain = new BlockchainClass(blocks);
+        const blockchain = new BlockchainClass(blocks, pendingTransactions);
 
         // Mine pending transactions
         blockchain.minePendingTransactions(address);
@@ -44,17 +56,24 @@ export async function POST(
             },
         });
 
+        await prismaClient.pendingTransaction.deleteMany();
+
         // Return success response
         return NextResponse.json({
             success: true,
             message: "Block mined successfully",
-            block: latestMinedBlock,
         });
-    } catch (error) {
+    } catch (err: any) {
+        console.log(err.message);
         // Return error response
-        return NextResponse.json({
-            success: false,
-            message: "Block mined Failed",
-        });
+        return NextResponse.json(
+            {
+                success: false,
+                message: err.message,
+            },
+            { status: 500 }
+        );
     }
 }
+
+export const dynamic = "force-dynamic";

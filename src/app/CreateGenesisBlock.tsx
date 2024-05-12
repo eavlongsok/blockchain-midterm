@@ -20,7 +20,7 @@ export default function CreateGenesisBlock({
     async function handleClick() {
         const response = await fetch("/api/blocks/create-genesis-block", {
             method: "POST",
-            cache: "no-cache",
+            cache: "no-store",
         });
         const json = await response.json();
 

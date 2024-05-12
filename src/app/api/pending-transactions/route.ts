@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import prismaClient from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
 export async function GET() {
     let pendingTransactions = await prismaClient.pendingTransaction.findMany({
@@ -7,3 +7,5 @@ export async function GET() {
     });
     return NextResponse.json({ pendingTransactions });
 }
+
+export const dynamic = "force-dynamic";

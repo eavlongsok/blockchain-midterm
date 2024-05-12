@@ -40,7 +40,8 @@ export async function POST() {
     try {
         await prismaClient.wallet.create({
             data: {
-                address: process.env.OFFICIAL_WALLET_ADDRESS as string,
+                address: process.env
+                    .NEXT_PUBLIC_OFFICIAL_WALLET_ADDRESS as string,
                 privateKey: null,
             },
         });
