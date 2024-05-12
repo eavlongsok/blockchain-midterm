@@ -39,11 +39,11 @@ export default function Page() {
             <div className='mx-10 my-10'>
                 <h1 className='text-3xl font-bold'>Home Page</h1>
                 <div className='mt-4 flex space-x-4'>
-                    <Verification />
                     <CreateGenesisBlock
                         isVisible={hasFetched && blocks.length === 0}
                         onCreate={(block) => setBlocks([{ ...block }])}
                     />
+                    <Verification />
                 </div>
                 <div className='rounded-md border my-5'>
                     <Table className='mt-5 caption-top'>

@@ -331,6 +331,10 @@ export class BlockchainClass {
     isChainValid(): boolean {
         // Check if the Genesis block hasn't been tampered with by comparing
         // the output of createGenesisBlock with the first block on our chain
+        if (this.chain.length === 0) {
+            return true;
+        }
+
         const tmpBlockchain = new BlockchainClass([]);
         tmpBlockchain.createGenesisBlock();
         const realGenesis = JSON.stringify(tmpBlockchain.chain[0]);
